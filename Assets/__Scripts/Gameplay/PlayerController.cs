@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using Photon.Pun;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -8,15 +9,22 @@ public class PlayerController : MonoBehaviour
     [SerializeField] float speed;
     [SerializeField] float lerpDuration;
     [SerializeField] bool CanMove = true;
-    public Rigidbody2D rb { get; private set; }
 
+    public static PlayerController LocalPlayer { get; private set; }
+    public Rigidbody2D rb { get; private set; }
+    public PhotonView pv { get; private set; }
 
     //float timer;
     Vector2 movInput = Vector2.zero;
     Vector2 pos;
-    private void Start()
+
+    private void Awake()
     {
         rb = GetComponent<Rigidbody2D>();
+        pv = GetComponent<PhotonView>();
+
+        if (pv.IsMine) LocalPlayer = this;
+        else this.enabled = false;
     }
 
     private void FixedUpdate()

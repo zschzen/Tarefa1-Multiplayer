@@ -5,7 +5,7 @@ using UnityEngine;
 public class PlayerCollisions : MonoBehaviour
 {
 
-    private void OnCollisionEnter2D(Collision2D other)
+    private void OnTriggerEnter2D(Collider2D _)
     {
         // call death
         //gameObject.SetActive(false);

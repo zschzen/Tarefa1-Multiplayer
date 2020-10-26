@@ -1,9 +1,11 @@
 using UnityEngine;
 using DG.Tweening;
+using ExitGames.Client.Photon;
+using Photon.Pun;
+using Photon.Realtime;
 
 public class ImmortalSaw : SawBase
 {
-
     float spawnY, spawnX;
     Vector2 RandomScreenPoint
     {
@@ -20,14 +22,42 @@ public class ImmortalSaw : SawBase
         }
     }
 
-    protected override void Init()
+    // Event
+    public static readonly byte ImmortalSawCode = 3;
+
+    protected override void Init() => SendImmortalSawEvent();
+
+    private void GoToTargetPoint(Vector2 newPoint)
     {
         transform.DOMove(
-            RandomScreenPoint,
+            newPoint,
             Random.Range(3.7f, 5.5f)
         )
         .SetEase(Ease.InOutBack)
-        .OnComplete(() => Init());
+        .OnComplete(() =>
+        {
+            if (PhotonNetwork.LocalPlayer.IsMasterClient)
+                SendImmortalSawEvent();
+        });
+    }
+
+    public void SendImmortalSawEvent()
+    {
+        object[] content = new object[] { ID, RandomScreenPoint };
+        RaiseEventOptions raiseEventOptions = new RaiseEventOptions { Receivers = ReceiverGroup.All };
+        PhotonNetwork.RaiseEvent(ImmortalSawCode, content, raiseEventOptions, SendOptions.SendReliable);
+    }
+
+    public override void OnEvent(EventData photonEvent)
+    {
+        if (photonEvent.Code != ImmortalSawCode) return;
+
+        object[] data = (object[])photonEvent.CustomData;
+
+        var SawIDToMove = (int)data[0];
+
+        if (SawIDToMove == this.ID)
+            GoToTargetPoint((Vector2)data[1]);
     }
 
 }

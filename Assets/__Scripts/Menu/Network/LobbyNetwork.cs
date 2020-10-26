@@ -7,6 +7,7 @@ using UnityEngine.UI;
 
 public class LobbyNetwork : MonoBehaviourPunCallbacks
 {
+    [SerializeField] Transform PlayerListDisplay;
     [SerializeField] GameObject PlayerNamePrefab;
 
     public Dictionary<string, Text> AllPlayers { get; private set; }
@@ -53,7 +54,7 @@ public class LobbyNetwork : MonoBehaviourPunCallbacks
     {
         if (AllPlayers.ContainsKey(newPlayerNickname)) return; // prevent duplication
 
-        playerNameDisplay = Instantiate(PlayerNamePrefab, transform).GetComponent<Text>();
+        playerNameDisplay = Instantiate(PlayerNamePrefab, PlayerListDisplay).GetComponent<Text>();
         playerNameDisplay.text = newPlayerNickname;
 
         if (PhotonNetwork.LocalPlayer.NickName == newPlayerNickname) playerNameDisplay.color = Color.green;

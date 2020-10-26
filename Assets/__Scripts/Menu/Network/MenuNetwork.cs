@@ -13,6 +13,10 @@ public class MenuNetwork : MonoBehaviourPunCallbacks
     public override void OnJoinedRoom()
     {
         MenuManager.Instance.TransitionToScreenByName("Lobby");
+
+#if UNITY_EDITOR
+        Debug.Log($"MenuNetwork :: Entrando na sala '{PhotonNetwork.CurrentRoom.Name}'");
+#endif
     }
 
     public override void OnJoinRandomFailed(short returnCode, string message)
@@ -44,7 +48,7 @@ public class MenuNetwork : MonoBehaviourPunCallbacks
 
         PhotonNetwork.CreateRoom(roomName, roomOpt);
 #if UNITY_EDITOR
-        Debug.Log($"Creating random room {roomName}");
+        Debug.Log($"MenuNetwork :: Criando a sala '{roomName}'");
 #endif
     }
 }

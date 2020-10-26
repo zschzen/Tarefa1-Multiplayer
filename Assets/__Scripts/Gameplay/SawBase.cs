@@ -4,16 +4,32 @@ using UnityEngine;
 using kTools.Pooling;
 
 using DG.Tweening;
+using Photon.Realtime;
 
-
-public class SawBase : MonoBehaviour
+public class SawBase : ReciveEvents
 {
+
+    #region Vars
     [SerializeField] float FadeOutTransitionDuration = 3f;
     [SerializeField] float InitialImmortalityDuration = 2f;
-    [SerializeField] SpriteRenderer renderer;
+    [SerializeField] new SpriteRenderer renderer;
 
-    private void OnEnable()
+    int id = -1;
+    public int ID
     {
+        get => id;
+
+        set
+        {
+            if (id < 0) id = value;
+        }
+    }
+    #endregion
+
+    private new void OnEnable()
+    {
+        base.OnEnable();
+
         var initialPos = Camera.main.ScreenToWorldPoint(new Vector2(Screen.width / 2, Screen.height / 2));
         initialPos.z = 0f;
         transform.position = initialPos;
@@ -21,27 +37,28 @@ public class SawBase : MonoBehaviour
         renderer.material.DOFade(0f, 0f);
 
         var sequence = DOTween.Sequence();
-        //sequence.Append(transform.DOMove(Camera.main.ScreenToWorldPoint(new Vector3(Screen.width / 2, Screen.height / 2, 0f)), .0f));
+ 
         sequence.AppendCallback(() =>
         {
             GetComponent<Collider2D>().enabled = false;
             gameObject.isStatic = true;
         });
-        sequence.Append(renderer.material.DOFade(.25f, 1f));
+        sequence.Join(renderer.material.DOFade(.25f, 1f));
         sequence.AppendInterval(InitialImmortalityDuration);
-        sequence.Append(renderer.material.DOFade(1f, .25f));
         sequence.AppendCallback(() =>
         {
             GetComponent<Collider2D>().enabled = true;
             gameObject.isStatic = false;
         });
+        sequence.Join(renderer.material.DOFade(1f, .25f));
         sequence.OnComplete(() => Init());
     }
 
     protected virtual void Init() { }
 
-    private void OnDisable()
+    private new void OnDisable()
     {
+        base.OnDisable();
         StopAllCoroutines();
     }
 
@@ -55,6 +72,6 @@ public class SawBase : MonoBehaviour
     {
         yield return new WaitForSeconds(FadeOutTransitionDuration);
 
-        PoolingSystem.ReturnInstance(name.Replace("(Clone)", string.Empty), gameObject);
+        //PoolingSystem.ReturnInstance(name.Replace("(Clone)", string.Empty), gameObject);
     }
 }
