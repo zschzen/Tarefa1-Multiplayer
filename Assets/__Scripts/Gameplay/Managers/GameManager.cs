@@ -23,15 +23,16 @@ public class GameManager : ReciveEvents
 
     public static GameManager instance { get; private set; }
 
-    private void Awake() => instance = this;
-
-    private void Start()
+    private void Awake()
     {
+        instance = this;
+
+
         foreach (var item in SawTypes)
         {
             //PoolingSystem.CreatePool(item.name, item, SawInstanceCount);
             AllSawsInstanceCount.Add(item.name, 0);
-            if (item.name == "ImmortalSaw") AllSawsInstanceLimit.Add(item.name, 15); // get from a scriptable
+            if (item.name == "ImmortalSaw") AllSawsInstanceLimit.Add(item.name, 3); // get from a scriptable
             else AllSawsInstanceLimit.Add(item.name, int.MaxValue);
         }
 
@@ -43,7 +44,19 @@ public class GameManager : ReciveEvents
         }
 
         if (PhotonNetwork.LocalPlayer.IsMasterClient)
-            InvokeRepeating("SendSpawnSawEvent", 3, SawSpawnTime);
+        {
+            Photon.Pun.UtilityScripts.CountdownTimer.OnCountdownTimerHasExpired += SendSpawnSawEvent;
+            Photon.Pun.UtilityScripts.CountdownTimer.SetStartTime();
+        }
+    }
+
+    public override void OnMasterClientSwitched(Player newMasterClient)
+    {
+        if (PhotonNetwork.LocalPlayer.IsMasterClient)
+        {
+            Photon.Pun.UtilityScripts.CountdownTimer.OnCountdownTimerHasExpired += SendSpawnSawEvent;
+            Photon.Pun.UtilityScripts.CountdownTimer.SetStartTime();
+        }
     }
 
     void SpawnSaw(string sawType)
@@ -52,7 +65,15 @@ public class GameManager : ReciveEvents
 
         //var saw = PhotonNetwork.Instantiate(sawType, Vector3.zero, Quaternion.identity);
         var saw = Instantiate(SawTypes[0], Vector3.zero, Quaternion.identity);
-        saw.GetComponent<SawBase>().ID = AllSawsInstanceCount[sawType]++;
+        saw.GetComponent<SawBase>().ID = AllSawsInstanceCount[sawType];
+
+        AllSawsInstanceCount[sawType]++;
+
+        if (PhotonNetwork.LocalPlayer.IsMasterClient)
+        {
+            Photon.Pun.UtilityScripts.CountdownTimer.SetStartTime();
+            Photon.Pun.UtilityScripts.CountdownTimer.instance.enabled = true;
+        }
     }
 
     void SpawnPlayers()

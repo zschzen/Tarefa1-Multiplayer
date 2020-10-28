@@ -27,13 +27,15 @@ public class ImmortalSaw : SawBase
 
     protected override void Init() => SendImmortalSawEvent();
 
-    private void GoToTargetPoint(Vector2 newPoint)
+    private void GoToTargetPoint(Vector2 newPoint, float randomDuration)
     {
         transform.DOMove(
             newPoint,
-            Random.Range(3.7f, 5.5f)
+            randomDuration
         )
-        .SetEase(Ease.InOutBack)
+        //.SetEase(Ease.InOutBack)
+        .SetEase(Ease.Linear)
+        .SetAutoKill()
         .OnComplete(() =>
         {
             if (PhotonNetwork.LocalPlayer.IsMasterClient)
@@ -43,7 +45,7 @@ public class ImmortalSaw : SawBase
 
     public void SendImmortalSawEvent()
     {
-        object[] content = new object[] { ID, RandomScreenPoint };
+        object[] content = new object[] { ID, RandomScreenPoint, Random.Range(3.7f, 5.5f) };
         RaiseEventOptions raiseEventOptions = new RaiseEventOptions { Receivers = ReceiverGroup.All };
         PhotonNetwork.RaiseEvent(ImmortalSawCode, content, raiseEventOptions, SendOptions.SendReliable);
     }
@@ -57,7 +59,7 @@ public class ImmortalSaw : SawBase
         var SawIDToMove = (int)data[0];
 
         if (SawIDToMove == this.ID)
-            GoToTargetPoint((Vector2)data[1]);
+            GoToTargetPoint((Vector2)data[1], (float)data[2]);
     }
 
 }

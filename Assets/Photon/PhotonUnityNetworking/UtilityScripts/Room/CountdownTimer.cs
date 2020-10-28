@@ -44,6 +44,8 @@ namespace Photon.Pun.UtilityScripts
         [Header("Countdown time in seconds")] 
         public float Countdown = 5.0f;
 
+        public void ResetCountdown() => Countdown = 5.0f;
+
         private bool isTimerRunning;
 
         private int startTime;
@@ -56,7 +58,12 @@ namespace Photon.Pun.UtilityScripts
         ///     Called when the timer has expired.
         /// </summary>
         public static event CountdownTimerHasExpired OnCountdownTimerHasExpired;
+        public static CountdownTimer instance;
 
+        private void Awake()
+        {
+            instance = this;
+        }
 
         public void Start()
         {
@@ -84,7 +91,7 @@ namespace Photon.Pun.UtilityScripts
             if (!this.isTimerRunning) return;
 
             float countdown = TimeRemaining();
-            this.Text.text = string.Format("Game starts in {0} seconds", countdown.ToString("n0"));
+            this.Text.text = countdown.ToString("n0");
 
             if (countdown > 0.0f) return;
 
