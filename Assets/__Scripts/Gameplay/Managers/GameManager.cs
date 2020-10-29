@@ -97,9 +97,7 @@ public class GameManager : ReciveEvents
 
         object[] data = (object[])photonEvent.CustomData;
 
-        string sawName = (string)data[0];
-
-        SpawnSaw(sawName);
+        SpawnSaw((string)data[0]);
     }
 
 }
