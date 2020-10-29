@@ -99,8 +99,6 @@ public class GameManager : ReciveEvents
 
         string sawName = (string)data[0];
 
-        Debug.LogWarning(AllSawsInstanceCount[sawName] + "-----" + sawName);
-
         SpawnSaw(sawName);
     }
 
