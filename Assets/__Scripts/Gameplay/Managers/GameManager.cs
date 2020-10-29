@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using kTools.Pooling;
 using Photon.Pun;
-
+using Photon.Pun.UtilityScripts;
 using UnityEngine.AddressableAssets;
 using UnityEngine.ResourceManagement.AsyncOperations;
 using ExitGames.Client.Photon;
@@ -15,7 +15,7 @@ public class GameManager : ReciveEvents
     [SerializeField] GameObject[] SawTypes;
 
     // Event
-    public static readonly byte SpawnSawCode = 2;
+    public static readonly byte SpawnSawCode = 10;
 
     private GameObject player;
     private Dictionary<string, int> AllSawsInstanceCount = new Dictionary<string, int>();
@@ -32,7 +32,7 @@ public class GameManager : ReciveEvents
         {
             //PoolingSystem.CreatePool(item.name, item, SawInstanceCount);
             AllSawsInstanceCount.Add(item.name, 0);
-            if (item.name == "ImmortalSaw") AllSawsInstanceLimit.Add(item.name, 3); // get from a scriptable
+            if (item.name == "ImmortalSaw") AllSawsInstanceLimit.Add(item.name, 10); // get from a scriptable
             else AllSawsInstanceLimit.Add(item.name, int.MaxValue);
         }
 
@@ -42,37 +42,37 @@ public class GameManager : ReciveEvents
             var playerGO = Resources.Load<GameObject>("Player");
             playerGO = GameObject.Instantiate(playerGO, Vector3.zero, Quaternion.identity);
         }
+    }
 
-        if (PhotonNetwork.LocalPlayer.IsMasterClient)
-        {
-            Photon.Pun.UtilityScripts.CountdownTimer.OnCountdownTimerHasExpired += SendSpawnSawEvent;
-            Photon.Pun.UtilityScripts.CountdownTimer.SetStartTime();
-        }
+    private void Start()
+    {
+        if (!PhotonNetwork.LocalPlayer.IsMasterClient) return;
+
+        CountdownTimer.OnCountdownTimerHasExpired += SendSpawnSawEvent;
+        CountdownTimer.SetStartTime();
     }
 
     public override void OnMasterClientSwitched(Player newMasterClient)
     {
-        if (PhotonNetwork.LocalPlayer.IsMasterClient)
-        {
-            Photon.Pun.UtilityScripts.CountdownTimer.OnCountdownTimerHasExpired += SendSpawnSawEvent;
-            Photon.Pun.UtilityScripts.CountdownTimer.SetStartTime();
-        }
+        if (!newMasterClient.IsLocal) return;
+
+        CountdownTimer.OnCountdownTimerHasExpired += SendSpawnSawEvent;
+        CountdownTimer.SetStartTime();
     }
 
     void SpawnSaw(string sawType)
     {
         if (AllSawsInstanceCount[sawType] >= AllSawsInstanceLimit[sawType]) return; // limit saws
+        //if (CountdownTimer.instance.TimeRemaining() > .0f) return;
 
         //var saw = PhotonNetwork.Instantiate(sawType, Vector3.zero, Quaternion.identity);
         var saw = Instantiate(SawTypes[0], Vector3.zero, Quaternion.identity);
-        saw.GetComponent<SawBase>().ID = AllSawsInstanceCount[sawType];
-
-        AllSawsInstanceCount[sawType]++;
+        saw.GetComponent<SawBase>().ID = AllSawsInstanceCount[sawType]++;
 
         if (PhotonNetwork.LocalPlayer.IsMasterClient)
         {
-            Photon.Pun.UtilityScripts.CountdownTimer.SetStartTime();
-            Photon.Pun.UtilityScripts.CountdownTimer.instance.enabled = true;
+            CountdownTimer.SetStartTime();
+            //CountdownTimer.instance.enabled = true;
         }
     }
 
@@ -97,7 +97,11 @@ public class GameManager : ReciveEvents
 
         object[] data = (object[])photonEvent.CustomData;
 
-        SpawnSaw((string)data[0]);
+        string sawName = (string)data[0];
+
+        Debug.LogWarning(AllSawsInstanceCount[sawName] + "-----" + sawName);
+
+        SpawnSaw(sawName);
     }
 
 }

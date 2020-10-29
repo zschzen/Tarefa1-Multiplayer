@@ -14,7 +14,7 @@ public class SawBase : ReciveEvents
     [SerializeField] float InitialImmortalityDuration = 2f;
     [SerializeField] new SpriteRenderer renderer;
 
-    int id = -1;
+    [SerializeField] int id = -1;
     public int ID
     {
         get => id;
@@ -65,7 +65,7 @@ public class SawBase : ReciveEvents
     protected virtual void OnBecameInvisible()
     {
         if (!gameObject.activeSelf) return;
-        StartCoroutine(CountToReturnInstance());
+        //StartCoroutine(CountToReturnInstance());
     }
 
     IEnumerator CountToReturnInstance()

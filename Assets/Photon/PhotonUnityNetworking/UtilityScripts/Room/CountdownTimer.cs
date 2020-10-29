@@ -108,7 +108,7 @@ namespace Photon.Pun.UtilityScripts
         private void OnTimerEnds()
         {
             this.isTimerRunning = false;
-            this.enabled = false;
+            //this.enabled = false;
 
             Debug.Log("Emptying info text.", this.Text);
             this.Text.text = string.Empty;
@@ -143,7 +143,7 @@ namespace Photon.Pun.UtilityScripts
         }
 
 
-        private float TimeRemaining()
+        public float TimeRemaining()
         {
             int timer = PhotonNetwork.ServerTimestamp - this.startTime;
             return this.Countdown - timer / 1000f;

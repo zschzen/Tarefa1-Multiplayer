@@ -23,7 +23,7 @@ public class ImmortalSaw : SawBase
     }
 
     // Event
-    public static readonly byte ImmortalSawCode = 3;
+    public static readonly byte MoveImmortalSawCode = 30;
 
     protected override void Init() => SendImmortalSawEvent();
 
@@ -33,26 +33,24 @@ public class ImmortalSaw : SawBase
             newPoint,
             randomDuration
         )
-        //.SetEase(Ease.InOutBack)
-        .SetEase(Ease.Linear)
+        .SetEase(Ease.InOutBack)
+        //.SetEase(Ease.Linear)
         .SetAutoKill()
-        .OnComplete(() =>
-        {
-            if (PhotonNetwork.LocalPlayer.IsMasterClient)
-                SendImmortalSawEvent();
-        });
+        .OnComplete(() => SendImmortalSawEvent());
     }
 
     public void SendImmortalSawEvent()
     {
-        object[] content = new object[] { ID, RandomScreenPoint, Random.Range(3.7f, 5.5f) };
+        if (!PhotonNetwork.LocalPlayer.IsMasterClient) return;
+
+        object[] content = new object[] { ID, RandomScreenPoint, Random.Range(2.5f, 6f) };
         RaiseEventOptions raiseEventOptions = new RaiseEventOptions { Receivers = ReceiverGroup.All };
-        PhotonNetwork.RaiseEvent(ImmortalSawCode, content, raiseEventOptions, SendOptions.SendReliable);
+        PhotonNetwork.RaiseEvent(MoveImmortalSawCode, content, raiseEventOptions, SendOptions.SendReliable);
     }
 
     public override void OnEvent(EventData photonEvent)
     {
-        if (photonEvent.Code != ImmortalSawCode) return;
+        if (photonEvent.Code != MoveImmortalSawCode) return;
 
         object[] data = (object[])photonEvent.CustomData;
 
