@@ -37,7 +37,7 @@ public class SawBase : ReciveEvents
         renderer.material.DOFade(0f, 0f);
 
         var sequence = DOTween.Sequence();
- 
+
         sequence.AppendCallback(() =>
         {
             GetComponent<Collider2D>().enabled = false;
@@ -51,7 +51,11 @@ public class SawBase : ReciveEvents
             gameObject.isStatic = false;
         });
         sequence.Join(renderer.material.DOFade(1f, .25f));
-        sequence.OnComplete(() => Init());
+        sequence.OnComplete(() =>
+        {
+            transform.DORotate(new Vector3(0f, 0f, 360f), 1f, RotateMode.LocalAxisAdd).SetLoops(-1, LoopType.Incremental).SetRelative().SetEase(Ease.Linear);
+            Init();
+        });
     }
 
     protected virtual void Init() { }

@@ -19,6 +19,13 @@ public class MenuNetwork : MonoBehaviourPunCallbacks
 #endif
     }
 
+#if UNITY_EDITOR
+    public override void OnPlayerEnteredRoom(Player newPlayer)
+    {
+        Debug.Log($"MenuNetwork :: O jogador '{newPlayer.NickName}' entrou na sala");
+    }
+#endif
+
     public override void OnJoinRandomFailed(short returnCode, string message)
     {
         CreateRoom();
